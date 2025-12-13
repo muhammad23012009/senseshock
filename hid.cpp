@@ -40,8 +40,8 @@ static dualshock4_input_report ds_to_ds4_input(dualsense_input_report *in_report
     out_report.buttons[2] = in_report->buttons[2];
 
     // DualSense reports timestamps in units of 0.33us, but DualShock 4 uses 5.33us
-    // TODO: Should I fix this?
-    out_report.sensor_timestamp = in_report->sensor_timestamp & 0xFFFF;
+    // TODO: Should we round this instead of flooring it?
+    out_report.sensor_timestamp = in_report->sensor_timestamp / 16;
     out_report.sensor_temperature = 0; // TODO
     out_report.gyro[0] = in_report->gyro[0];
     out_report.gyro[1] = in_report->gyro[1];
