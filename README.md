@@ -12,8 +12,9 @@ It will automatically steal the DualSense from the hid-playstation driver and cl
 * Touchpad events
 * Gyro
 * All buttons, analog sticks and triggers
-* Classic DualShock 4 style rumble on the DualSense
 
 # TODO
 * Fix the awful thread structure
+* Implement polling for EP0 and EP2
+* Fix broken rumble for games (the vibration motors pulse instead of running continuously)
 * ...TBD.

@@ -21,6 +21,23 @@
 #include <cstdint>
 #include <linux/types.h>
 
+struct hid_class_descriptor {
+    uint8_t bDescriptorType;
+    __le16 wDescriptorLength;
+} __attribute__((packed));
+
+struct hid_descriptor {
+    uint8_t bLength;
+    uint8_t bDescriptorType;
+
+    __le16 bcdHID;
+    uint8_t bCountryCode;
+    uint8_t bNumDescriptors;
+
+    hid_class_descriptor rpt_desc;
+   // hid_class_descriptor opt_desc[];
+} __attribute__((packed));
+
 // This structure represents a single touch point on the touchpad
 struct touch_point {
     uint8_t contact;
@@ -59,7 +76,7 @@ const int dualshock4_input_report_size = sizeof(dualshock4_input_report);
 
 // Input report sent by the DualSense controller, we convert this to the DS4 format
 struct dualsense_input_report {
-    uint8_t report_id; // Always 0x01
+    uint8_t report_id; // 0x01 for USB, 0x31 for Bluetooth
 
     uint8_t x, y;
     uint8_t rx, ry;
@@ -101,9 +118,7 @@ struct dualshock4_output_report {
 } __attribute__((packed));
 
 // DualSense output report sent to the DualSense controller, we construct this from the DS4 output report
-struct dualsense_output_report {
-    uint8_t report_id; // Will always be 0x02
-
+struct dualsense_output_report_common {
     uint8_t valid_flag0;
     uint8_t valid_flag1;
 
@@ -130,5 +145,42 @@ struct dualsense_output_report {
     uint8_t lightbar_red;
     uint8_t lightbar_green;
     uint8_t lightbar_blue;
+} __attribute__((packed));
+static_assert(sizeof(dualsense_output_report_common) == 47, "dualsense_output_report_common size incorrect");
+
+struct dualsense_output_report_usb {
+    uint8_t report_id; // Will always be 0x02
+    dualsense_output_report_common common;
     uint8_t reserved4[15];
 } __attribute__((packed));
+static_assert(sizeof(dualsense_output_report_usb) == 63, "dualsense_output_report_usb size incorrect");
+
+struct dualsense_output_report_bt {
+    uint8_t report_id; // Will always be 0x31
+    uint8_t seq;
+    uint8_t tag;
+
+    dualsense_output_report_common common;
+    uint8_t reserved4[24];
+    __le32 crc32;
+} __attribute__((packed));
+
+static_assert(sizeof(dualsense_output_report_bt) == 78, "dualsense_output_report_bt size incorrect");
+
+// Reversed-engineered from Wireshark dumps
+struct dualshock_feature_report_firmware {
+    uint8_t report_id; // Always 0xA3
+
+    char build_date[16]; // ASCII build date, e.g. "Mar 25 2016"
+    char build_time[8]; // ASCII build time, e.g. "12:34:56"
+
+    uint8_t unknown[10];
+
+    uint16_t hw_version;
+    uint32_t unknown2;
+    uint16_t fw_version;
+
+    uint8_t unknown3[6];
+} __attribute__((packed));
+
+static_assert(sizeof(dualshock_feature_report_firmware) == 49, "dualshock_feature_report_firmware size incorrect");
