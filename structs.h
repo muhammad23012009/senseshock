@@ -172,15 +172,15 @@ struct dualshock_feature_report_firmware {
     uint8_t report_id; // Always 0xA3
 
     char build_date[16]; // ASCII build date, e.g. "Mar 25 2016"
-    char build_time[8]; // ASCII build time, e.g. "12:34:56"
+    char build_time[16]; // ASCII build time, e.g. "12:34:56"
 
-    uint8_t unknown[10];
+    uint16_t hw_version_major;
+    uint16_t hw_version_minor;
+    uint32_t fw_version_major;
+    uint16_t fw_version_minor;
 
-    uint16_t hw_version;
-    uint32_t unknown2;
-    uint16_t fw_version;
-
-    uint8_t unknown3[6];
+    uint16_t fw_series;
+    uint32_t code_size;
 } __attribute__((packed));
 
 static_assert(sizeof(dualshock_feature_report_firmware) == 49, "dualshock_feature_report_firmware size incorrect");

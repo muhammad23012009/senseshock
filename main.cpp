@@ -138,6 +138,8 @@ int DualShockEmulator::handle_get_report(uint8_t report_id, uint8_t *buffer)
 {
     // Handle the reportID's and send appropriate responses
 
+    std::cout << "Handling get_report for report ID: " << std::hex << (int)report_id << std::dec << "\n";
+
     switch (report_id) {
     case DS4_FEATURE_GYRO_CALIBRATION: {
         std::cout << "Forwarding gyro calibration request to DualSense\n";
@@ -164,8 +166,10 @@ int DualShockEmulator::handle_get_report(uint8_t report_id, uint8_t *buffer)
         std::memcpy(ds4_firmware.build_time, ds4_firmware_build_time, sizeof(ds4_firmware_build_time));
 
         // Needed by some games, e.g. Detroit: Become Human sanity-checks hw_version
-        ds4_firmware.hw_version = 0x6414;
-        ds4_firmware.fw_version = 0x7007;
+        ds4_firmware.hw_version_major = 0x0100;
+        ds4_firmware.hw_version_minor = 0x6414;
+        ds4_firmware.fw_version_major = 0x00000001;
+        ds4_firmware.fw_version_minor = 0x7007;
 
         std::memcpy(buffer, &ds4_firmware, sizeof(ds4_firmware));
 
@@ -211,7 +215,7 @@ void DualShockEmulator::setup_ep0(void)
     ::mkdir(gadget_path.c_str(), 0755);
 
     write_to_file("idVendor", "0x054c"); // Sony Corp
-    write_to_file("idProduct", "0x05c4"); // DualShock 4
+    write_to_file("idProduct", "0x09cc"); // DualShock 4
     write_to_file("bcdDevice", "0x0100");
     write_to_file("bcdUSB", "0x0200");
     write_to_file("bDeviceClass", "0x00");
